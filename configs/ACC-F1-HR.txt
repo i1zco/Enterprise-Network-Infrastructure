@@ -1,0 +1,39 @@
+! ACC-F1-HR - Access switch (2960)
+enable
+configure terminal
+hostname ACC-F1-HR
+no ip domain-lookup
+spanning-tree mode rapid-pvst
+vlan 20
+ name HR
+vlan 191
+ name MGMT-F1
+interface range fa0/1-5
+ description USER-PORTS-HR
+ switchport mode access
+ switchport access vlan 20
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+interface range fa0/6-24
+ shutdown
+interface gi0/1
+ description UPLINK-TO-DIST-A-Fa0/4
+ switchport mode trunk
+ switchport trunk allowed vlan 20,191
+ no shutdown
+interface gi0/2
+ description UPLINK-TO-DIST-B-Fa0/4
+ switchport mode trunk
+ switchport trunk allowed vlan 20,191
+ no shutdown
+interface vlan 191
+ ip address 10.1.191.12 255.255.255.0
+ no shutdown
+ip default-gateway 10.1.191.1
+end
+write memory

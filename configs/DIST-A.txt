@@ -1,0 +1,290 @@
+! DIST-A - Distribution (3560 L3)
+enable
+configure terminal
+hostname DIST-A
+no ip domain-lookup
+ip routing
+spanning-tree mode rapid-pvst
+vlan 10
+ name ADMIN
+vlan 20
+ name HR
+vlan 30
+ name IT
+vlan 40
+ name SALES
+vlan 50
+ name FIN
+vlan 60
+ name MKT
+vlan 191
+ name MGMT-F1
+vlan 192
+ name MGMT-F2
+vlan 193
+ name MGMT-F3
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 8192
+spanning-tree vlan 30 priority 4096
+spanning-tree vlan 40 priority 8192
+spanning-tree vlan 50 priority 4096
+spanning-tree vlan 60 priority 8192
+spanning-tree vlan 191 priority 4096
+spanning-tree vlan 192 priority 4096
+spanning-tree vlan 193 priority 4096
+interface fa0/1
+ description ROUTED-TO-CORE1-Fa0/1
+ no switchport
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+interface fa0/2
+ description ROUTED-TO-CORE2-Fa0/1
+ no switchport
+ ip address 10.0.0.6 255.255.255.252
+ no shutdown
+interface fa0/3
+ description TO-ACC-F1-ADMIN-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,191
+ no shutdown
+interface fa0/4
+ description TO-ACC-F1-HR-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 20,191
+ no shutdown
+interface fa0/5
+ description TO-ACC-F2-IT-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 30,192
+ no shutdown
+interface fa0/6
+ description TO-ACC-F2-SALES-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 40,192
+ no shutdown
+interface fa0/7
+ description TO-ACC-F3-FIN-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 50,193
+ no shutdown
+interface fa0/8
+ description TO-ACC-F3-MKT-Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 60,193
+ no shutdown
+interface fa0/9
+ description INTERLINK-TO-DIST-B-Fa0/9
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60,191,192,193
+ no shutdown
+interface range fa0/10 - 24
+ shutdown
+interface range gi0/1 - 2
+ shutdown
+interface vlan 10
+ description GW-ADMIN
+ ip address 10.1.10.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN10_IN in
+ standby 10 ip 10.1.10.1
+ standby 10 priority 110
+ standby 10 preempt
+ no shutdown
+interface vlan 20
+ description GW-HR
+ ip address 10.1.20.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN20_IN in
+ standby 20 ip 10.1.20.1
+ standby 20 priority 100
+ standby 20 preempt
+ no shutdown
+interface vlan 30
+ description GW-IT
+ ip address 10.1.30.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN30_IN in
+ standby 30 ip 10.1.30.1
+ standby 30 priority 110
+ standby 30 preempt
+ no shutdown
+interface vlan 40
+ description GW-SALES
+ ip address 10.1.40.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN40_IN in
+ standby 40 ip 10.1.40.1
+ standby 40 priority 100
+ standby 40 preempt
+ no shutdown
+interface vlan 50
+ description GW-FIN
+ ip address 10.1.50.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN50_IN in
+ standby 50 ip 10.1.50.1
+ standby 50 priority 110
+ standby 50 preempt
+ no shutdown
+interface vlan 60
+ description GW-MKT
+ ip address 10.1.60.2 255.255.255.0
+ ip helper-address 10.1.150.10
+ ip access-group ACL_VLAN60_IN in
+ standby 60 ip 10.1.60.1
+ standby 60 priority 100
+ standby 60 preempt
+ no shutdown
+interface vlan 191
+ description MGMT-F1
+ ip address 10.1.191.2 255.255.255.0
+ standby 191 ip 10.1.191.1
+ standby 191 priority 110
+ standby 191 preempt
+ no shutdown
+interface vlan 192
+ description MGMT-F2
+ ip address 10.1.192.2 255.255.255.0
+ standby 192 ip 10.1.192.1
+ standby 192 priority 110
+ standby 192 preempt
+ no shutdown
+interface vlan 193
+ description MGMT-F3
+ ip address 10.1.193.2 255.255.255.0
+ standby 193 ip 10.1.193.1
+ standby 193 priority 110
+ standby 193 preempt
+ no shutdown
+ip access-list extended ACL_VLAN10_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.10.0 0.0.0.255 host 10.1.10.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.10.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.10.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.10.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.10.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.10.0 0.0.0.255 10.1.30.0 0.0.0.255
+ permit ip 10.1.10.0 0.0.0.255 10.1.40.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.10.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.10.0 0.0.0.255 any
+ip access-list extended ACL_VLAN20_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.20.0 0.0.0.255 host 10.1.20.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.20.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.20.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.20.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.20.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.20.0 0.0.0.255 10.1.30.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.20.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.20.0 0.0.0.255 any
+ip access-list extended ACL_VLAN30_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.30.0 0.0.0.255 host 10.1.30.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.30.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.30.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.30.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.30.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.30.0 0.0.0.255 10.1.10.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.20.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.40.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.50.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.60.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.191.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.192.0 0.0.0.255
+ permit ip 10.1.30.0 0.0.0.255 10.1.193.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.30.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.30.0 0.0.0.255 any
+ip access-list extended ACL_VLAN40_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.40.0 0.0.0.255 host 10.1.40.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.40.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.40.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.40.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.40.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.40.0 0.0.0.255 10.1.10.0 0.0.0.255
+ permit ip 10.1.40.0 0.0.0.255 10.1.30.0 0.0.0.255
+ permit ip 10.1.40.0 0.0.0.255 10.1.60.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.40.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.40.0 0.0.0.255 any
+ip access-list extended ACL_VLAN50_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.50.0 0.0.0.255 host 10.1.50.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.50.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.50.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.50.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.50.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.50.0 0.0.0.255 10.1.30.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.50.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.50.0 0.0.0.255 any
+ip access-list extended ACL_VLAN60_IN
+ remark allow DHCP
+ permit udp any eq bootpc any eq bootps
+ remark ping own gateway (HSRP virtual IP)
+ permit icmp 10.1.60.0 0.0.0.255 host 10.1.60.1
+ remark DNS + Web (HTTP/HTTPS) on server
+ permit udp 10.1.60.0 0.0.0.255 host 10.1.150.11 eq 53
+ permit tcp 10.1.60.0 0.0.0.255 host 10.1.150.11 eq 80
+ permit tcp 10.1.60.0 0.0.0.255 host 10.1.150.11 eq 443
+ permit icmp 10.1.60.0 0.0.0.255 10.1.150.0 0.0.0.255
+ remark approved peer departments
+ permit ip 10.1.60.0 0.0.0.255 10.1.30.0 0.0.0.255
+ permit ip 10.1.60.0 0.0.0.255 10.1.40.0 0.0.0.255
+ remark deny all other internal networks
+ deny ip 10.1.60.0 0.0.0.255 10.0.0.0 0.255.255.255
+ remark Internet / VPN
+ permit ip 10.1.60.0 0.0.0.255 any
+router ospf 10
+ router-id 2.2.2.1
+ passive-interface default
+ no passive-interface fa0/1
+ no passive-interface fa0/2
+ network 10.1.10.0 0.0.0.255 area 0
+ network 10.1.20.0 0.0.0.255 area 0
+ network 10.1.30.0 0.0.0.255 area 0
+ network 10.1.40.0 0.0.0.255 area 0
+ network 10.1.50.0 0.0.0.255 area 0
+ network 10.1.60.0 0.0.0.255 area 0
+ network 10.1.191.0 0.0.0.255 area 0
+ network 10.1.192.0 0.0.0.255 area 0
+ network 10.1.193.0 0.0.0.255 area 0
+ network 10.0.0.0 0.0.0.3 area 0
+ network 10.0.0.4 0.0.0.3 area 0
+end
+write memory

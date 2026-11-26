@@ -1,0 +1,19 @@
+! ISP - Router
+enable
+configure terminal
+hostname ISP
+no ip domain-lookup
+interface gi0/0
+ description TO-EDGE-Gi0/2
+ ip address 200.0.0.2 255.255.255.252
+ no shutdown
+interface gi0/1
+ description TO-BRANCH-Gi0/0
+ ip address 200.0.1.1 255.255.255.252
+ no shutdown
+interface gi0/2
+ description TO-EXTERNAL-SERVER
+ ip address 8.8.8.1 255.255.255.0
+ no shutdown
+end
+write memory

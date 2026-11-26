@@ -1,0 +1,35 @@
+! SRV-SW - Server-room switch (2960)
+enable
+configure terminal
+hostname SRV-SW
+no ip domain-lookup
+vlan 150
+ name SERVERS
+interface fa0/1
+ description SRV-DHCP
+ switchport mode access
+ switchport access vlan 150
+ no shutdown
+interface fa0/2
+ description SRV-DNS-WEB
+ switchport mode access
+ switchport access vlan 150
+ no shutdown
+interface range fa0/3 - 24
+ shutdown
+interface gi0/1
+ description UPLINK-TO-CORE1-Fa0/5
+ switchport mode access
+ switchport access vlan 150
+ no shutdown
+interface gi0/2
+ description UPLINK-TO-CORE2-Fa0/5
+ switchport mode access
+ switchport access vlan 150
+ no shutdown
+interface vlan 150
+ ip address 10.1.150.5 255.255.255.0
+ no shutdown
+ip default-gateway 10.1.150.1
+end
+write memory

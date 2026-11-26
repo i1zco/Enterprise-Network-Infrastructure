@@ -1,0 +1,54 @@
+! EDGE - Router (NAT + site-to-site IPsec VPN)
+! VPN needs the security license first (then reload):
+!   ISR4331 : license boot level securityk9
+!   2911    : license boot module c2900 technology-package securityk9
+enable
+configure terminal
+hostname EDGE
+no ip domain-lookup
+interface gi0/0
+ description TO-CORE1-Fa0/4
+ ip address 10.0.0.22 255.255.255.252
+ ip nat inside
+ no shutdown
+interface gi0/1
+ description TO-CORE2-Fa0/4
+ ip address 10.0.0.26 255.255.255.252
+ ip nat inside
+ no shutdown
+interface gi0/2
+ description TO-ISP-Gi0/0
+ ip address 200.0.0.1 255.255.255.252
+ ip nat outside
+ no shutdown
+ip route 0.0.0.0 0.0.0.0 200.0.0.2
+router ospf 10
+ router-id 3.3.3.3
+ passive-interface default
+ no passive-interface gi0/0
+ no passive-interface gi0/1
+ network 10.0.0.20 0.0.0.3 area 0
+ network 10.0.0.24 0.0.0.3 area 0
+! NAT: exempt VPN traffic, translate the rest
+access-list 100 deny ip 10.1.0.0 0.0.255.255 192.168.50.0 0.0.0.255
+access-list 100 permit ip 10.1.0.0 0.0.255.255 any
+ip nat inside source list 100 interface gi0/2 overload
+! VPN interesting traffic
+access-list 101 permit ip 10.1.0.0 0.0.255.255 192.168.50.0 0.0.0.255
+
+crypto isakmp policy 10
+ encryption aes
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 86400
+crypto isakmp key VPNkey123 address 200.0.1.2
+crypto ipsec transform-set TS esp-aes esp-sha-hmac
+crypto map CMAP 10 ipsec-isakmp
+ set peer 200.0.1.2
+ set transform-set TS
+ match address 101
+interface gi0/2
+ crypto map CMAP
+end
+write memory
