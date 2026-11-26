@@ -1,6 +1,6 @@
 # Enterprise 3-Tier Network (Cisco Packet Tracer)
 
-A fully redundant **Core / Distribution / Access** campus network with a branch site, built and documented in Cisco Packet Tracer.
+A fully redundant **Core / Distribution / Access** campus network with a branch site, built and documented in Cisco Packet Tracer
 
 ![Cisco](https://img.shields.io/badge/Cisco-Packet%20Tracer-1BA0D7) ![OSPF](https://img.shields.io/badge/OSPF-Area%200-blue) ![HSRP](https://img.shields.io/badge/HSRP-Redundant%20GW-green) ![IPsec](https://img.shields.io/badge/IPsec-Site--to--Site%20VPN-orange)
 
@@ -16,28 +16,12 @@ A fully redundant **Core / Distribution / Access** campus network with a branch 
 - **Port security** (sticky MAC), PortFast + BPDU Guard, unused ports shut down
 
 ## Topology
-```mermaid
-graph TD
-  EXT[SRV-EXTERNAL 8.8.8.8] --- ISP
-  ISP --- BRANCH[BRANCH 192.168.50.0/24]
-  ISP --- EDGE[EDGE NAT + VPN]
-  EDGE --- CORE1
-  EDGE --- CORE2
-  CORE1 --- CORE2
-  CORE1 --- DISTA[DIST-A]
-  CORE1 --- DISTB[DIST-B]
-  CORE2 --- DISTA
-  CORE2 --- DISTB
-  CORE1 --- SRVSW[SRV-SW DHCP .10 / DNS-WEB .11]
-  CORE2 --- SRVSW
-  DISTA --- DISTB
-  DISTA --- A1[ACC-F1-ADMIN / HR]
-  DISTA --- A2[ACC-F2-IT / SALES]
-  DISTA --- A3[ACC-F3-FIN / MKT]
-  DISTB --- A1
-  DISTB --- A2
-  DISTB --- A3
-```
+
+![3-Tier Network Architecture](topology/3tier.png)
+
+
+
+
 Add your exported diagram to `topology/` together with the `.pkt` file.
 
 ## VLANs
@@ -66,6 +50,3 @@ Full tables: [`docs/IP-Addressing.md`](docs/IP-Addressing.md) | ACL policy: [`do
 - Verify HSRP (`standby`) is supported by the 3560 image in your Packet Tracer version.
 - The VPN pre-shared key (`VPNkey123`) is a **lab value only**. Never reuse it.
 - The first VPN ping usually fails while IKE negotiates; retry.
-
-## License
-MIT
