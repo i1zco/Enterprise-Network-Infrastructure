@@ -21,9 +21,6 @@ A fully redundant **Core / Distribution / Access** campus network with a branch 
 
 
 
-
-Add your exported diagram to `topology/` together with the `.pkt` file.
-
 ## VLANs
 | VLAN | Name | Subnet | Floor |
 |---|---|---|---|
